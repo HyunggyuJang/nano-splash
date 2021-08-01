@@ -145,7 +145,7 @@
   (if (get-buffer "*splash*")
       (progn (message nil)
              (cancel-function-timers 'nano-splash-fade-out)
-             (cancel-function-timers 'nano-spash-help-message)
+             (cancel-function-timers 'nano-splash-help-message)
              (kill-buffer "*splash*"))))
 
 

@@ -121,7 +121,7 @@
 (defun nano-splash-fade-out ()
   "Fade out current frame for duration and goes to command-or-bufffer"
   (interactive)
-  (cl-letf ((symbol-function 'mac-animation-fade-out-local) (apply-partially 'mac-animation-fade-out 0.5))
+  (cl-letf ((symbol-function 'mac-animation-fade-out-local) (lambda nil (mac-animation-fade-out 2)))
     (if (get-buffer "*splash*")
         (progn (if (and (display-graphic-p) (fboundp 'mac-start-animation))
                    (advice-add 'set-window-buffer

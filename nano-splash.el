@@ -44,7 +44,7 @@
   "Splash screen subtitle"
   :type 'string :group 'nano-splash)
 
-(defcustom nano-splash-duration 10.5
+(defcustom nano-splash-duration 1.5
   "Splash screen duration (in seconds)"
   :type 'float :group 'nano-splash)
 
@@ -81,8 +81,6 @@
           (setq vertical-scroll-bar nil)
           (setq horizontal-scroll-bar nil)
           (setq fill-column width)
-          (face-remap-add-relative 'link :underline nil)
-          (if (not (display-graphic-p)) (menu-bar-mode 0))
 
           ;; Vertical padding to center
           (insert-char ?\n padding-center)
@@ -96,11 +94,7 @@
           (read-only-mode t)
           (local-set-key [t] 'nano-splash-kill)
           (display-buffer-same-window splash-buffer nil)
-          (run-with-idle-timer 0.05 nil (lambda() (message nil)))
-          (run-with-idle-timer nano-splash-duration nil 'nano-splash-fade-out)
-	  (if (fboundp 'nano-splash-help-message)
-              (run-with-idle-timer (+ nano-splash-duration 0.05) nil 'nano-splash-help-message))
-	  )
+          (run-with-idle-timer nano-splash-duration nil 'nano-splash-fade-out))
       (nano-splash-kill))))
 
 
@@ -145,7 +139,6 @@
   (if (get-buffer "*splash*")
       (progn (message nil)
              (cancel-function-timers 'nano-splash-fade-out)
-             (cancel-function-timers 'nano-splash-help-message)
              (kill-buffer "*splash*"))))
 
 

@@ -121,17 +121,16 @@
 (defun nano-splash-fade-out ()
   "Fade out current frame for duration and goes to command-or-bufffer"
   (interactive)
-  (defalias 'mac-animation-fade-out-local
-    (apply-partially 'mac-animation-fade-out 0.5))
-  (if (get-buffer "*splash*")
-      (progn (if (and (display-graphic-p) (fboundp 'mac-start-animation))
-                 (advice-add 'set-window-buffer
-                             :before 'mac-animation-fade-out-local))
-             (message nil)
-             (kill-buffer "*splash*")
-             (if (and (display-graphic-p) (fboundp 'mac-start-animation))
-                 (advice-remove 'set-window-buffer
-                                'mac-animation-fade-out-local)))))
+  (cl-letf ((symbol-function 'mac-animation-fade-out-local) (apply-partially 'mac-animation-fade-out 0.5))
+    (if (get-buffer "*splash*")
+        (progn (if (and (display-graphic-p) (fboundp 'mac-start-animation))
+                   (advice-add 'set-window-buffer
+                               :before 'mac-animation-fade-out-local))
+               (message nil)
+               (kill-buffer "*splash*")
+               (if (and (display-graphic-p) (fboundp 'mac-start-animation))
+                   (advice-remove 'set-window-buffer
+                                  'mac-animation-fade-out-local))))))
 
 (defun nano-splash-kill ()
   "Kill the splash screen buffer (immediately)."

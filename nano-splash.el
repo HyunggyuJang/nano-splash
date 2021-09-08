@@ -48,88 +48,48 @@
   "Splash screen duration (in seconds)"
   :type 'float :group 'nano-splash)
 
+(defun nano-splash-resize-h ()
+  (let (window-configuration-change-hook)
+    (with-current-buffer (get-buffer-create "*splash*")
+      (with-silent-modifications
+        (erase-buffer)
+        (setq fill-column (round (window-body-width nil)))
+        ;; Vertical padding to center
+        (insert-char ?\n (+ (/ (round (- (window-body-height nil) 1))
+                               2)
+                            1))
+        (insert (propertize nano-splash-title 'face 'nano-strong))
+        (center-line)
+        (insert "\n")
+        (insert (propertize nano-splash-subtitle 'face 'nano-faded))
+        (center-line)
+        (goto-char 0)))))
 
 (defun nano-splash ()
   "Nano Emacs splash screen"
-  
-  (interactive)
-
-  ;; Hide modeline before window-body-height is computed
-  (let* ((splash-buffer (get-buffer-create "*splash*")))
+  (let ((splash-buffer (get-buffer-create "*splash*")))
     (with-current-buffer splash-buffer
+      ;; Hide modeline before window-body-height is computed
       (setq header-line-format nil)
-      (setq mode-line-format nil)))
-  
-  (let* ((splash-buffer  (get-buffer-create "*splash*"))
-         (height         (round (- (window-body-height nil) 1) ))
-         (width          (round (window-body-width nil)        ))
-         (padding-center (+ (/ height 2) 1)))
-    
-    ;; If there are buffer associated with filenames,
-    ;;  we don't show the splash screen.
-    (if (eq 0 (length (cl-loop for buf in (buffer-list)
-                              if (buffer-file-name buf)
-                              collect (buffer-file-name buf))))
-        
-        (with-current-buffer splash-buffer
-          (erase-buffer)
-          
-          ;; Buffer local settings
-          (if (one-window-p) (setq mode-line-format nil))
-          (setq cursor-type nil)
-          (setq line-spacing 0)
-          (setq vertical-scroll-bar nil)
-          (setq horizontal-scroll-bar nil)
-          (setq fill-column width)
+      (setq mode-line-format nil)
+      (setq cursor-type nil)
+      (setq line-spacing 0)
+      (nano-splash-resize-h)
+      (read-only-mode t)
+      (display-buffer-same-window splash-buffer nil)
+      (run-with-idle-timer nano-splash-duration nil 'nano-splash-fade-out))))
 
-          ;; Vertical padding to center
-          (insert-char ?\n padding-center)
-          (insert (propertize nano-splash-title 'face 'nano-strong))
-          (center-line)
-          (insert "\n")
-          (insert (propertize nano-splash-subtitle 'face 'nano-faded))
-          (center-line)
+(defun nano-splash-init-h ()
+  (unless noninteractive
+    (add-hook 'window-configuration-change-hook #'nano-splash-resize-h)
+    (nano-splash)))
 
-          (goto-char 0)
-          (read-only-mode t)
-          (local-set-key [t] 'nano-splash-kill)
-          (display-buffer-same-window splash-buffer nil)
-          (run-with-idle-timer nano-splash-duration nil 'nano-splash-fade-out))
-      (nano-splash-kill))))
-
-
-(defun center-string (string)
-  "Pad a string with space on the left such as to center it"
-  (let* ((padding (/ (- (window-body-width) (length string)) 2))
-         (padding (+ (length string) padding)))
-    ;; If the string is displayed as a tooltip, don't pad it
-    (if (and tooltip-mode (fboundp 'x-show-tip))
-        string
-      (format (format "%%%ds" padding) string))))
-
-;; Mac only animation , available from
-;;  https://bitbucket.org/mituharu/emacs-mac/src/master/
-;;  https://github.com/railwaycat/homebrew-emacsmacport
-(defvar mac-animation-locked-p nil)
-(defun mac-animation-toggle-lock ()
-  (setq mac-animation-locked-p (not mac-animation-locked-p)))
-(defun mac-animation-fade-out (duration &rest args)
-  (unless mac-animation-locked-p
-    (mac-animation-toggle-lock)
-    (mac-start-animation nil :type 'fade-out :duration duration)
-    (run-with-timer duration nil 'mac-animation-toggle-lock)))
 (defun nano-splash-fade-out ()
   "Fade out current frame for duration and goes to command-or-bufffer"
   (when (get-buffer "*splash*")
-    (mac-animation-fade-out 2)
+    (if (fboundp 'mac-start-animation)
+        (mac-start-animation nil :type 'fade-out :duration 2))
     (kill-buffer "*splash*")))
-
-(defun nano-splash-kill ()
-  "Kill the splash screen buffer (immediately)."
-  (interactive)
-  (if (get-buffer "*splash*")
-      (progn (cancel-function-timers 'nano-splash-fade-out)
-             (kill-buffer "*splash*"))))
 
 (provide 'nano-splash)
 

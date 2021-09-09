@@ -92,5 +92,3 @@
     (kill-buffer "*splash*")))
 
 (provide 'nano-splash)
-
-

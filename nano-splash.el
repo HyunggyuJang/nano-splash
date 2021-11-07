@@ -86,6 +86,7 @@
 
 (defun nano-splash-fade-out ()
   "Fade out current frame for duration and goes to command-or-bufffer"
+  (remove-hook 'window-configuration-change-hook #'nano-splash-resize-h)
   (when (get-buffer "*splash*")
     (if (fboundp 'mac-start-animation)
         (mac-start-animation nil :type 'fade-out :duration 2))

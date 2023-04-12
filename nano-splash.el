@@ -1,7 +1,7 @@
 ;;; nano-splash.el --- N Λ N O Splash -*- lexical-binding: t -*-
 ;; ---------------------------------------------------------------------
 ;; GNU Emacs / N Λ N O Splash
-;; Copyright (C) 2020-2021 - N Λ N O developers 
+;; Copyright (C) 2020-2021 - N Λ N O developers
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;; ---------------------------------------------------------------------
-;; 
+;;
 ;; This file defines a splash screen
 ;;  - No logo, no modeline, no scrollbars
 ;;  - Any key / mouse click kills the splash screen
@@ -74,15 +74,11 @@
       (setq mode-line-format nil)
       (setq cursor-type nil)
       (setq line-spacing 0)
+      (add-hook 'window-configuration-change-hook #'nano-splash-resize-h)
       (nano-splash-resize-h)
       (read-only-mode t)
       (display-buffer-same-window splash-buffer nil)
       (run-with-idle-timer nano-splash-duration nil 'nano-splash-fade-out))))
-
-(defun nano-splash-init-h ()
-  (unless noninteractive
-    (add-hook 'window-configuration-change-hook #'nano-splash-resize-h)
-    (nano-splash)))
 
 (defun nano-splash-fade-out ()
   "Fade out current frame for duration and goes to command-or-bufffer"
